@@ -16,14 +16,48 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    
+    
 }
 
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesBegan:touches withEvent:event];
+    
+    [self gcdDemo4];
 }
 
+- (void)gcdDemo4 {
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        NSLog(@"耗时操作 - %@", [NSThread currentThread]);
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSLog(@"更新UI - %@", [NSThread currentThread]);
+        });
+    });
+}
+
+- (void)gcdDemo3 {
+    for (int i = 0; i < 10; i++) {
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            NSLog(@"%@", [NSThread currentThread]);
+        });
+    }
+}
+
+- (void)gcdDemo2 {
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        NSLog(@"%@", [NSThread currentThread]);
+    });
+}
+
+- (void)gcdDemo1 {
+    dispatch_queue_t q = dispatch_get_global_queue(0, 0);
+    void (^task)() = ^{
+        NSLog(@"%@", [NSThread currentThread]);
+    };
+    
+    dispatch_async(q, task);
+}
 
 @end
