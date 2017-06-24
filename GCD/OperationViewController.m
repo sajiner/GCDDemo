@@ -22,7 +22,59 @@
 }
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    [self opDemo8];
+    [self dependency];
+}
+
+/// 依赖关系
+- (void)dependency {
+    NSBlockOperation *op1 = [NSBlockOperation blockOperationWithBlock:^{
+        NSLog(@"登录 %@", [NSThread currentThread]);
+    }];
+    NSBlockOperation *op2 = [NSBlockOperation blockOperationWithBlock:^{
+        NSLog(@"付费 %@", [NSThread currentThread]);
+    }];
+    NSBlockOperation *op3 = [NSBlockOperation blockOperationWithBlock:^{
+        NSLog(@"下载 %@", [NSThread currentThread]);
+    }];
+    NSBlockOperation *op4 = [NSBlockOperation blockOperationWithBlock:^{
+        NSLog(@"通知用户 %@", [NSThread currentThread]);
+    }];
+    
+    [op2 addDependency:op1];
+    [op3 addDependency:op2];
+    [op4 addDependency:op3];
+    // YES - 同步； NO - 异步
+    [self.queue addOperations:@[op1, op2, op3] waitUntilFinished:YES];
+    [[NSOperationQueue mainQueue] addOperation:op4];
+    NSLog(@"come here");
+}
+
+/// 暂停／继续
+/// 队列挂起，当前‘没有完成的操作’，是算在队列的操作数里的
+/// 队列挂起，不会影响已经执行操作的执行状态
+/// 对列一旦被挂起，再添加的操作不会被调度
+- (IBAction)pauseAndResume {
+    if (self.queue.operationCount == 0) {
+        return;
+    }
+    self.queue.suspended = !self.queue.isSuspended;
+    if (self.queue.isSuspended) {
+        NSLog(@"暂停%tu", self.queue.operationCount);
+    } else {
+        NSLog(@"继续%tu", self.queue.operationCount);
+    }
+}
+
+/// 取消队列中的所有操作
+/// 不会取消正在执行中的操作
+/// 不会影响队列的挂起状态
+- (IBAction)cancelAll {
+    if (self.queue.operationCount == 0) {
+        return;
+    }
+    
+    [self.queue cancelAllOperations];
+    NSLog(@"取消全部操作：%tu", self.queue.operationCount);
 }
 
 
