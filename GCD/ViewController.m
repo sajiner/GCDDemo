@@ -19,6 +19,7 @@
     [super viewDidLoad];
     
     NSLog(@"测试分支");
+    NSLog(@"coem here");
 }
 
 - (void)loadView {
